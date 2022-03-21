@@ -1,0 +1,225 @@
+<?php
+$host       = "localhost";
+$user       = "root";
+$pass       = "";
+$db         = "mahasiswa";
+
+$koneksi    = mysqli_connect($host, $user, $pass, $db);
+if (!$koneksi) {
+    die("Tidak bisa terkoneksi");
+}
+$nama       = "";
+$umur        = "";
+$angkatan   = "";
+$hobi      = "";
+$berhasil   = "";
+$error      = "";
+
+$op = "";
+
+if (isset($_GET['op'])) {
+    $op = $_GET['op'];
+    
+}
+if($op == 'delete'){
+    $id         = $_GET['id'];
+    $sql1       = "delete from mahasiswa where id = '$id'";
+    $q1         = mysqli_query($koneksi,$sql1);
+    if($q1){
+        $berhasil = "Berhasil hapus data";
+    }else{
+        $error  = "Gagal melakukan delete data";
+    }
+}
+if ($op == 'edit') {
+    $id         = $_GET['id'];
+    $sql1       = "select * from mahasiswa where id = '$id'";
+    $q1         = mysqli_query($koneksi, $sql1);
+    $r1         = mysqli_fetch_array($q1);
+    $nama       = $r1['nama'];
+    $umur      = $r1['umur'];
+    $angkatan   = $r1['angkatan'];
+    $hobi     = $r1['hobi'];
+
+
+    if ($hobi == '') {
+        $error = "Data tidak ditemukan";
+    }
+  
+}
+if (isset($_POST['simpan'])) { //untuk create
+    $nama       = $_POST['nama'];
+    $umur        = $_POST['umur'];
+    $angkatan   = $_POST['angkatan'];
+    $hobi      = $_POST['hobi'];
+
+    if ($nama && $umur && $angkatan && $hobi) {
+        if ($op == 'edit') { //untuk update
+            $sql1       = "update mahasiswa set nama = '$nama',umur='$umur', angkatan = '$angkatan', hobi='$hobi' where id = '$id'";
+            $q1         = mysqli_query($koneksi, $sql1);
+            if ($q1) {
+                $berhasil= "Data berhasil diupdate";
+            } else {
+                $error  = "Data gagal diupdate";
+            }
+        } else { //untuk insert
+            $sql1   = "insert into mahasiswa (nama,umur,angkatan,hobi) values ('$nama','$umur','$angkatan','$hobi')";
+            $q1     = mysqli_query($koneksi, $sql1);
+            if ($q1) {
+                $berhasil    = "Berhasil memasukkan data baru";
+            } else {
+                $error      = "Gagal memasukkan data";
+            }
+        }
+    } else {
+        $error = "Silakan masukkan semua data";
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Mahasiswa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <style>
+        .container{
+            width: 100%;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto;
+        }
+        
+        .card {
+            margin-top: 15px;
+        }
+         
+    </style>
+</head>
+
+<body>
+    <div class="mx-auto container">
+        
+        <div class="card">
+            <div class="card-header text-white bg-success" >
+               Buat Data
+            </div>
+            <div class="card-body">
+                <?php
+                if ($error) {
+                ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?php echo $error ?>
+                    </div>
+                <?php
+                    header("refresh:5;url=pemweb5.php");//5 : detik
+                }
+                ?>
+                <?php
+                if ($berhasil) {
+                ?>
+                    <div class="alert alert-success" role="alert">
+                        <?php echo $berhasil ?>
+                    </div>
+                <?php
+                    header("refresh:5;url=pemweb5.php");
+                }
+                ?>
+                <form action="" method="POST">
+                   
+                    <div class="mb-3 row">
+                        <label for="nama" class="col-sm-2 col-form-label">Nama</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="nama" name="nama" value="<?php echo $nama ?>">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="umur" class="col-sm-2 col-form-label">Umur</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="umur" name="umur" value="<?php echo $umur ?>">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="angkatan" class="col-sm-2 col-form-label">Angkatan</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="angkatan" name="angkatan" value="<?php echo $angkatan ?>">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="hobi" class="col-sm-2 col-form-label">Hobi</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" name="hobi" id="hobi">
+                                <option value="">- Pilih Hobi -</option>
+                                <option value="Membaca" <?php if ($hobi == "Membaca") echo "selected" ?>>Membaca</option>
+                                <option value="Menulis" <?php if ($hobi== "Menulis") echo "selected" ?>>Menulis</option>
+                                <option value="Melukis" <?php if ($hobi == "Melukis") echo "selected" ?>>Melukis</option>
+                                <option value="Bermain game" <?php if ($hobi== "Bermain game") echo "selected" ?>>Bermain game</option>
+                                <option value="Berenang" <?php if ($hobi == "Berenang") echo "selected" ?>>Berenang</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 text-center">
+                        <input type="submit" name="simpan" value="Simpan" class="btn btn-info text-black"/>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        
+        <div class="card">
+            <div class="card-header text-white bg-success">
+                Biodata Mahasiswa
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nomor</th>
+                            <th scope="col">Nama</th>
+                            <th scope="col">Umur</th>
+
+                            <th scope="col">Angkatan</th>
+                            <th scope="col">Hobi</th>
+                            <th scope="col">Hasil</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $sql2   = "select * from mahasiswa order by id desc";
+                        $q2     = mysqli_query($koneksi, $sql2);
+                        $urut   = 1;
+                        while ($r2 = mysqli_fetch_array($q2)) {
+                            $id         = $r2['id'];
+                            $nama       = $r2['nama'];
+                            $umur       = $r2['umur'];
+                            $angkatan   = $r2['angkatan'];
+                            $hobi      = $r2['hobi'];
+
+                        ?>
+                            <tr>
+                                <th scope="row"><?php echo $urut ?></th>
+                                <td scope="row"><?php echo $nama ?></td>
+                                <td scope="row"><?php echo $umur ?></td>
+                                <td scope="row"><?php echo $angkatan ?></td>
+                                <td scope="row"><?php echo $hobi ?></td>
+                                <td scope="row" class="btn-group-justified">
+                                    <a href="pemweb5.php?op=edit&id=<?php echo $id?>"><button type="button" class="btn btn-dark">Edit</button></a>
+                                    <a href="pemweb5.php?op=delete&id=<?php echo $id?>" onclick="return confirm('Apakah Anda yakin ?')"><button type="button" class="btn btn-danger">Delete</button></a>            
+                                </td>
+                            </tr>
+                        <?php
+                        }
+                        ?>
+                    </tbody>
+                    
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
